@@ -1,7 +1,10 @@
 import './style.css'
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
+import gsap from 'gsap'
+
+const gltfLoader = new GLTFLoader() 
 
 // Debug
 const gui = new dat.GUI()
@@ -12,21 +15,25 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
-// Objects
-const geometry = new THREE.TorusGeometry( .7, .2, 16, 100 );
+let tl = gsap.timeline()
+//our phone
+gltfLoader.load('untitled.gltf',(gltf)=>{
+    gltf.scene.scale.set(0.3, 0.3, 0.3)
+    gltf.scene.rotation.set(0, 3.3, 0)
+    scene.add(gltf.scene)
 
-// Materials
-
-const material = new THREE.MeshBasicMaterial()
-material.color = new THREE.Color(0xff0000)
-
-// Mesh
-const sphere = new THREE.Mesh(geometry,material)
-scene.add(sphere)
-
+    gui.add(gltf.scene.rotation, 'x').min(0).max(9)
+    gui.add(gltf.scene.rotation, 'y').min(0).max(9)
+    gui.add(gltf.scene.rotation, 'z').min(0).max(9)
+    tl.to(gltf.scene.rotation, { y: 4.7, duration: 1 })
+    tl.to(gltf.scene.scale, { x: 0.2, y:0.2,z:0.2, duration: 2 }, "-=1")
+    tl.to(gltf.scene.position,{x:.2})
+    tl.to(gltf.scene.rotation, { y: 3.3, duration: 1 })
+    tl.to(gltf.scene.scale, { x: 0.25, y:0.25,z:0.25,} ,"-=1")
+})
 // Lights
 
-const pointLight = new THREE.PointLight(0xffffff, 0.1)
+const pointLight = new THREE.AmbientLight(0xffffff, 1)
 pointLight.position.x = 2
 pointLight.position.y = 3
 pointLight.position.z = 4
@@ -62,7 +69,7 @@ window.addEventListener('resize', () =>
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.x = 0
 camera.position.y = 0
-camera.position.z = 2
+camera.position.z = 1
 scene.add(camera)
 
 // Controls
@@ -73,7 +80,8 @@ scene.add(camera)
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    alpha:true
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -90,7 +98,7 @@ const tick = () =>
     const elapsedTime = clock.getElapsedTime()
 
     // Update objects
-    sphere.rotation.y = .5 * elapsedTime
+    //sphere.rotation.y = .5 * elapsedTime
 
     // Update Orbital Controls
     // controls.update()
